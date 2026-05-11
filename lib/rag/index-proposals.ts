@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
+import { randomUUID } from 'crypto'
 import { db } from '@/lib/db/client'
 import { uploadFile, buildStorageKey } from '@/lib/storage/r2'
 import { extractText } from '@/lib/parser/extract-text'
@@ -19,24 +20,31 @@ export async function indexOldProposals(orgId: string): Promise<void> {
   }
 
   for (const fileName of files) {
-    const existing = await db.oldProposal.findFirst({ where: { orgId: org.id, fileName } })
-    if (existing) continue
+    if (!/\.(pdf|docx)$/i.test(fileName)) continue
 
-    const filePath = path.join(PROPOSALS_DIR, fileName)
-    const buffer = await fs.readFile(filePath)
-    const mimeType = fileName.endsWith('.pdf')
-      ? 'application/pdf'
-      : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    try {
+      const existing = await db.oldProposal.findFirst({ where: { orgId: org.id, fileName } })
+      if (existing) continue
 
-    const text = await extractText(buffer, mimeType)
-    const embedding = await embedText(text)
+      const filePath = path.join(PROPOSALS_DIR, fileName)
+      const buffer = await fs.readFile(filePath)
+      const mimeType = fileName.endsWith('.pdf')
+        ? 'application/pdf'
+        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
-    const key = buildStorageKey(org.id, fileName).replace('/rfp/', '/proposals/')
-    await uploadFile(key, buffer, mimeType)
+      const text = await extractText(buffer, mimeType)
+      const embedding = await embedText(text)
 
-    await db.$executeRaw`
-      INSERT INTO "OldProposal" (id, "orgId", "fileName", "storageKey", embedding, "createdAt")
-      VALUES (gen_random_uuid(), ${org.id}, ${fileName}, ${key}, ${JSON.stringify(embedding)}::vector, NOW())
-    `
+      const key = buildStorageKey(org.id, fileName).replace('/rfp/', '/proposals/')
+      await uploadFile(key, buffer, mimeType)
+
+      const id = randomUUID()
+      await db.$executeRaw`
+        INSERT INTO "OldProposal" (id, "orgId", "fileName", "storageKey", embedding, "createdAt")
+        VALUES (${id}, ${org.id}, ${fileName}, ${key}, ${JSON.stringify(embedding)}::vector, NOW())
+      `
+    } catch (err) {
+      console.error(`[rag/index] Failed to index "${fileName}":`, err)
+    }
   }
 }
