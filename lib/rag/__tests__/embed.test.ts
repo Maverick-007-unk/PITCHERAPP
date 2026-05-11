@@ -1,11 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('openai', () => ({
-  default: vi.fn(() => ({
-    embeddings: {
-      create: vi.fn().mockResolvedValue({ data: [{ embedding: Array(1536).fill(0.1) }] }),
-    },
-  })),
+  default: vi.fn(function () {
+    return {
+      embeddings: {
+        create: vi.fn().mockResolvedValue({ data: [{ embedding: Array(1536).fill(0.1) }] }),
+      },
+    }
+  }),
 }))
 
 import { embedText } from '../embed'
