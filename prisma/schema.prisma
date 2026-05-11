@@ -1,0 +1,95 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [vector]
+}
+
+enum Role {
+  ADMIN
+  PITCHER
+  VIEWER
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+}
+
+model Org {
+  id          String        @id @default(cuid())
+  clerkOrgId  String        @unique
+  name        String
+  createdAt   DateTime      @default(now())
+  users       User[]
+  rfps        RFP[]
+  pitches     Pitch[]
+  proposals   OldProposal[]
+}
+
+model User {
+  id          String @id @default(cuid())
+  clerkUserId String @unique
+  orgId       String
+  role        Role   @default(PITCHER)
+  org         Org    @relation(fields: [orgId], references: [id])
+}
+
+model RFP {
+  id            String    @id @default(cuid())
+  orgId         String
+  fileName      String
+  storageKey    String
+  status        JobStatus @default(PENDING)
+  extractedJson Json?
+  inngestJobId  String?
+  createdAt     DateTime  @default(now())
+  org           Org       @relation(fields: [orgId], references: [id])
+  pitches       Pitch[]
+}
+
+model OldProposal {
+  id         String                       @id @default(cuid())
+  orgId      String
+  fileName   String
+  storageKey String
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                     @default(now())
+  org        Org                          @relation(fields: [orgId], references: [id])
+}
+
+model Theme {
+  id           String  @id @default(cuid())
+  name         String
+  thumbnailUrl String
+  config       Json
+  pitches      Pitch[]
+}
+
+model Pitch {
+  id           String    @id @default(cuid())
+  orgId        String
+  rfpId        String
+  themeId      String
+  status       JobStatus @default(PENDING)
+  sections     Json?
+  inngestJobId String?
+  createdAt    DateTime  @default(now())
+  org          Org       @relation(fields: [orgId], references: [id])
+  rfp          RFP       @relation(fields: [rfpId], references: [id])
+  theme        Theme     @relation(fields: [themeId], references: [id])
+  deck         Deck?
+}
+
+model Deck {
+  id          String    @id @default(cuid())
+  pitchId     String    @unique
+  shareToken  String    @unique @default(cuid())
+  publishedAt DateTime?
+  pitch       Pitch     @relation(fields: [pitchId], references: [id])
+}
