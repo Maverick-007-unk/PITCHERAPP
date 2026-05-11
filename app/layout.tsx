@@ -2,7 +2,6 @@ import { Archivo_Black, Space_Mono, Inter } from 'next/font/google'
 import './globals.css'
 
 const archivo = Archivo_Black({
-  weight: '400',
   subsets: ['latin'],
   variable: '--font-archivo',
 })
