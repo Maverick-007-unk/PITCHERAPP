@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { LayoutGrid, FileText, Star, Monitor, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -13,7 +14,18 @@ const NAV = [
   { id: 'team' as NavItem, href: '/team', icon: Users, label: 'Team' },
 ]
 
-export function Sidebar({ activeItem }: { activeItem: NavItem }) {
+function getActiveItem(pathname: string): NavItem {
+  if (pathname.startsWith('/rfp')) return 'rfp'
+  if (pathname.startsWith('/pitch/new')) return 'pitch'
+  if (pathname.startsWith('/pitch')) return 'deck'
+  if (pathname.startsWith('/team')) return 'team'
+  return 'dashboard'
+}
+
+export function Sidebar() {
+  const pathname = usePathname()
+  const activeItem = getActiveItem(pathname)
+
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-14 bg-ko-black border-r-2 border-[#222] flex flex-col items-center py-4 gap-1.5 z-50">
       <div className="font-archivo text-[11px] text-ko-orange uppercase tracking-tight4 border-2 border-ko-orange px-1 py-1.5 mb-3">
