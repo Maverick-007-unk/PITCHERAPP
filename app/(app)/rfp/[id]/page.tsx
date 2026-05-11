@@ -10,9 +10,11 @@ export default async function RfpDetailPage({ params }: { params: Promise<{ id: 
   const { orgId } = await auth()
   if (!orgId) redirect('/sign-in')
 
-  const { id } = await params
+  const org = await db.org.findUnique({ where: { clerkOrgId: orgId } })
+  if (!org) redirect('/sign-in')
 
-  const rfp = await db.rFP.findUnique({ where: { id } })
+  const { id } = await params
+  const rfp = await db.rFP.findUnique({ where: { id, orgId: org.id } })
   if (!rfp) notFound()
 
   const data = rfp.extractedJson as RfpData | null
