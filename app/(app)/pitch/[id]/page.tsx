@@ -3,6 +3,8 @@ import { redirect, notFound } from 'next/navigation'
 import { db } from '@/lib/db/client'
 import { GenerationProgress } from '@/components/pitch/generation-progress'
 import { PublishButton } from './publish-button'
+import { SlideView } from '@/components/deck/slide-view'
+import type { PitchSections } from '@/lib/ai/generate-pitch'
 
 export default async function PitchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { orgId } = await auth()
@@ -18,17 +20,7 @@ export default async function PitchDetailPage({ params }: { params: Promise<{ id
   })
   if (!pitch) notFound()
 
-  const sections = pitch.sections as Record<string, string> | null
-
-  const SECTION_LABELS: Record<string, string> = {
-    executiveSummary: 'Executive Summary',
-    whyUs: 'Why Us',
-    audienceReach: 'Audience',
-    deliverables: 'What You Get',
-    pricing: 'Investment',
-    timeline: 'Timeline',
-    cta: "Let's Talk",
-  }
+  const sections = pitch.sections as PitchSections | null
 
   return (
     <div className="p-6">
@@ -48,21 +40,7 @@ export default async function PitchDetailPage({ params }: { params: Promise<{ id
       <GenerationProgress pitchId={pitch.id} initialStatus={pitch.status as 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED'} />
 
       {sections && (
-        <div className="space-y-1">
-          {Object.entries(sections).map(([key, value]) => (
-            <div
-              key={key}
-              className="min-h-[320px] border border-[#222] p-12 flex flex-col justify-between"
-            >
-              <p className="font-mono text-[9px] uppercase tracking-tight2 text-ko-orange">
-                // {SECTION_LABELS[key] ?? key}
-              </p>
-              <p className="font-archivo text-4xl uppercase tracking-tight4 leading-brutalist text-ko-white max-w-3xl">
-                {value}
-              </p>
-            </div>
-          ))}
-        </div>
+        <SlideView sections={sections as PitchSections} themeName={pitch.theme.name} />
       )}
     </div>
   )
