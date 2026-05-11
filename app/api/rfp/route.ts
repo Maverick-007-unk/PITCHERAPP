@@ -4,6 +4,8 @@ import { db } from '@/lib/db/client'
 import { buildStorageKey, uploadFile } from '@/lib/storage/r2'
 import { inngest } from '@/lib/inngest/client'
 
+const MAX_BYTES = 20 * 1024 * 1024
+
 export async function POST(req: NextRequest) {
   const { userId, orgId } = await auth()
   if (!userId || !orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -17,24 +19,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Only PDF and DOCX files are supported' }, { status: 400 })
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer())
-  const key = buildStorageKey(orgId, file.name)
-  await uploadFile(key, buffer, file.type)
+  if (file.size > MAX_BYTES) {
+    return NextResponse.json({ error: 'File too large. Maximum size is 20MB.' }, { status: 413 })
+  }
 
-  // Ensure org record exists in our DB
-  await db.org.upsert({
-    where: { clerkOrgId: orgId },
-    create: { clerkOrgId: orgId, name: orgId },
-    update: {},
-  })
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const key = buildStorageKey(orgId, file.name)
+    await uploadFile(key, buffer, file.type)
 
-  const org = await db.org.findUniqueOrThrow({ where: { clerkOrgId: orgId } })
+    await db.org.upsert({
+      where: { clerkOrgId: orgId },
+      create: { clerkOrgId: orgId, name: orgId },
+      update: {},
+    })
 
-  const rfp = await db.rFP.create({
-    data: { orgId: org.id, fileName: file.name, storageKey: key, status: 'PENDING' },
-  })
+    const org = await db.org.findUniqueOrThrow({ where: { clerkOrgId: orgId } })
 
-  await inngest.send({ name: 'rfp/parse', data: { rfpId: rfp.id, storageKey: key, fileType: file.type } })
+    const rfp = await db.rFP.create({
+      data: { orgId: org.id, fileName: file.name, storageKey: key, status: 'PENDING' },
+    })
 
-  return NextResponse.json({ rfpId: rfp.id }, { status: 201 })
+    await inngest.send({ name: 'rfp/parse', data: { rfpId: rfp.id, storageKey: key, fileType: file.type } })
+
+    return NextResponse.json({ rfpId: rfp.id }, { status: 201 })
+  } catch (err) {
+    console.error('[rfp/upload]', err)
+    return NextResponse.json({ error: 'Upload failed. Please try again.' }, { status: 500 })
+  }
 }
