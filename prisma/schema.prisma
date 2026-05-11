@@ -33,11 +33,15 @@ model Org {
 }
 
 model User {
-  id          String @id @default(cuid())
-  clerkUserId String @unique
+  id          String   @id @default(cuid())
+  clerkUserId String   @unique
   orgId       String
-  role        Role   @default(PITCHER)
-  org         Org    @relation(fields: [orgId], references: [id])
+  role        Role     @default(PITCHER)
+  name        String?
+  email       String?
+  createdAt   DateTime @default(now())
+  org         Org      @relation(fields: [orgId], references: [id])
+  @@index([orgId])
 }
 
 model RFP {
@@ -51,6 +55,8 @@ model RFP {
   createdAt     DateTime  @default(now())
   org           Org       @relation(fields: [orgId], references: [id])
   pitches       Pitch[]
+  @@index([orgId])
+  @@index([orgId, createdAt(sort: Desc)])
 }
 
 model OldProposal {
@@ -61,6 +67,7 @@ model OldProposal {
   embedding  Unsupported("vector(1536)")?
   createdAt  DateTime                     @default(now())
   org        Org                          @relation(fields: [orgId], references: [id])
+  @@index([orgId])
 }
 
 model Theme {
@@ -84,6 +91,9 @@ model Pitch {
   rfp          RFP       @relation(fields: [rfpId], references: [id])
   theme        Theme     @relation(fields: [themeId], references: [id])
   deck         Deck?
+  @@index([orgId])
+  @@index([rfpId])
+  @@index([orgId, status])
 }
 
 model Deck {
