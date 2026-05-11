@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PITCHER — Kinetic Orange Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  ::selection { background: #000; color: #FF4D00; }
+
+  :root {
+    --orange: #FF4D00;
+    --black: #000000;
+    --white: #FFFFFF;
+  }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 56px;
+    background: var(--black);
+    border-right: 2px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 6px;
+    z-index: 100;
+  }
+  .sidebar-logo {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    color: var(--orange);
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    margin-bottom: 12px;
+    border: 2px solid var(--orange);
+    padding: 6px 4px;
+  }
+  .sidebar-icon {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .sidebar-icon.active {
+    color: var(--orange);
+    border: 1px solid var(--orange);
+  }
+  .sidebar-icon:hover { color: var(--white); border-color: #444; }
+  .sidebar-icon svg { width: 14px; height: 14px; }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: 56px;
+    min-height: 100vh;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    height: 48px;
+    border-bottom: 2px solid #222;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+  .topbar-title {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    color: var(--white);
+  }
+  .topbar-breadcrumb {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #555;
+    letter-spacing: -0.02em;
+  }
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pill-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    background: var(--orange);
+    color: var(--black);
+    border: 2px solid var(--orange);
+    padding: 5px 14px;
+    border-radius: 9999px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .pill-btn.outline {
+    background: transparent;
+    color: var(--white);
+    border-color: #444;
+  }
+
+  /* ── DASHBOARD HERO ── */
+  .hero {
+    padding: 48px 24px 0;
+    border-bottom: 2px solid #222;
+  }
+  .hero-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .hero-heading {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(48px, 7vw, 96px);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 0.88;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+  .hero-heading span { color: var(--orange); }
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    padding: 16px 0;
+    border-top: 2px solid #222;
+  }
+  .hero-stat {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .hero-stat-num {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 28px;
+    color: var(--orange);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .hero-stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-section {
+    background: var(--orange);
+    padding: 10px 0;
+    overflow: hidden;
+    border-top: 2px solid var(--black);
+    border-bottom: 2px solid var(--black);
+    transform: skewY(-1deg);
+    margin: 24px 0;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 32px;
+    white-space: nowrap;
+    animation: marquee 18s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    color: var(--black);
+    flex-shrink: 0;
+  }
+  .marquee-dot { color: var(--black); opacity: 0.4; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── PIPELINE STEPS ── */
+  .pipeline {
+    padding: 0 24px 24px;
+  }
+  .pipeline-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    padding: 16px 0 12px;
+    border-top: 2px solid #222;
+  }
+  .pipeline-item {
+    display: flex;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .pipeline-item:hover { background: rgba(255,77,0,0.04); padding-left: 8px; }
+  .pipeline-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--orange);
+    letter-spacing: -0.02em;
+    width: 32px;
+    flex-shrink: 0;
+  }
+  .pipeline-content { flex: 1; }
+  .pipeline-title {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(22px, 3vw, 40px);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: var(--white);
+    transition: transform 0.15s;
+  }
+  .pipeline-item:hover .pipeline-title { transform: translateX(16px); }
+  .pipeline-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #555;
+    margin-top: 4px;
+  }
+  .pipeline-tags {
+    display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
+  }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    border: 1px solid #333;
+    color: #666;
+    padding: 2px 8px;
+    border-radius: 9999px;
+  }
+  .tag.active { border-color: var(--orange); color: var(--orange); }
+  .pipeline-arrow {
+    font-size: 24px;
+    color: var(--orange);
+    opacity: 0;
+    transition: all 0.15s;
+    transform: rotate(0deg);
+  }
+  .pipeline-item:hover .pipeline-arrow { opacity: 1; transform: rotate(45deg); }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 48px 24px;
+    text-align: center;
+    border-top: 2px solid #222;
+  }
+  .cta-heading {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(36px, 6vw, 80px);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 0.88;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+  .cta-heading span { color: var(--orange); }
+  .cta-btn {
+    display: inline-block;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    background: var(--orange);
+    color: var(--black);
+    border: 2px solid var(--orange);
+    padding: 16px 48px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: transform 0.15s, scale 0.15s;
+  }
+  .cta-btn:hover { transform: scale(1.08); }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 16px 24px;
+    border-top: 2px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .footer-links {
+    display: flex; gap: 16px;
+  }
+  .footer-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .footer-link:hover { color: var(--orange); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">P</div>
+  <div class="sidebar-icon active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Home
+  </div>
+  <div class="sidebar-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    RFPs
+  </div>
+  <div class="sidebar-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    Pitch
+  </div>
+  <div class="sidebar-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    Deck
+  </div>
+  <div class="sidebar-icon" style="margin-top:auto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+    Team
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-breadcrumb">/ Team Liquid · Season 2026</div>
+    <div class="topbar-right">
+      <div class="pill-btn outline">Upload RFP</div>
+      <div class="pill-btn">New Pitch +</div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-label">// Pitcher — Esports Sponsorship OS</div>
+    <div class="hero-heading">Win<br>Every<br><span>Deal.</span></div>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <div class="hero-stat-num">04</div>
+        <div class="hero-stat-label">Active RFPs</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">12</div>
+        <div class="hero-stat-label">Pitches Generated</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">03</div>
+        <div class="hero-stat-label">Decks Sent</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">$2.4M</div>
+        <div class="hero-stat-label">Total Deal Value</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <span class="marquee-item">RFP Analyzer</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">Pitch Generator</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">Deck Maker</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">Export &amp; Share</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">RFP Analyzer</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">Pitch Generator</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">Deck Maker</span>
+      <span class="marquee-dot">◆</span>
+      <span class="marquee-item">Export &amp; Share</span>
+      <span class="marquee-dot">◆</span>
+    </div>
+  </div>
+
+  <!-- PIPELINE STEPS -->
+  <div class="pipeline">
+    <div class="pipeline-label">// Workflow Pipeline</div>
+
+    <div class="pipeline-item">
+      <div class="pipeline-num">01</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">RFP Analyzer</div>
+        <div class="pipeline-desc">Upload client RFP — AI extracts goals, budget, deliverables, deadlines</div>
+        <div class="pipeline-tags">
+          <span class="tag active">Active</span>
+          <span class="tag">PDF</span>
+          <span class="tag">DOCX</span>
+          <span class="tag">Claude API</span>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+    </div>
+
+    <div class="pipeline-item">
+      <div class="pipeline-num">02</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Theme Select</div>
+        <div class="pipeline-desc">Choose a deck theme before pitch generation begins</div>
+        <div class="pipeline-tags">
+          <span class="tag">Templates</span>
+          <span class="tag">Brand Kits</span>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+    </div>
+
+    <div class="pipeline-item">
+      <div class="pipeline-num">03</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Pitch Generator</div>
+        <div class="pipeline-desc">AI generates tailored pitch using RFP data + your past proposals</div>
+        <div class="pipeline-tags">
+          <span class="tag">RAG</span>
+          <span class="tag">Old Proposals</span>
+          <span class="tag">Inngest</span>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+    </div>
+
+    <div class="pipeline-item">
+      <div class="pipeline-num">04</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Deck Editor</div>
+        <div class="pipeline-desc">Full editor — text, layout, images, sections. Canva-style control.</div>
+        <div class="pipeline-tags">
+          <span class="tag">Drag &amp; Drop</span>
+          <span class="tag">Live Preview</span>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+    </div>
+
+    <div class="pipeline-item">
+      <div class="pipeline-num">05</div>
+      <div class="pipeline-content">
+        <div class="pipeline-title">Export &amp; Share</div>
+        <div class="pipeline-desc">Download PPTX / PDF or share a web link directly with sponsors</div>
+        <div class="pipeline-tags">
+          <span class="tag">PPTX</span>
+          <span class="tag">PDF</span>
+          <span class="tag">Share Link</span>
+        </div>
+      </div>
+      <div class="pipeline-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <div class="cta-heading">Close The<br><span>Sponsor.</span></div>
+    <div class="cta-btn">Start New Pitch →</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-copy">© 2026 PITCHER — Esports Sponsorship OS</div>
+    <div class="footer-links">
+      <span class="footer-link">Docs</span>
+      <span class="footer-link">Team</span>
+      <span class="footer-link">Settings</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
