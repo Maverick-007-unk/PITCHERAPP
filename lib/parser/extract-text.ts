@@ -1,4 +1,3 @@
-// @ts-ignore — pdf-parse v2 types don't declare a default export but the mock uses this shape
 import pdfParse from 'pdf-parse'
 import * as mammoth from 'mammoth'
 
