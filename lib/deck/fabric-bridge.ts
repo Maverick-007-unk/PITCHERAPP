@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { IText, Rect, Image } from 'fabric'
 import type { Canvas } from 'fabric'
 import type { Slide, SlideElement } from './types'
@@ -16,7 +17,7 @@ export async function loadSlide(
   getImageUrl: (storageKey: string) => Promise<string>
 ): Promise<void> {
   canvas.clear()
-  ;(canvas as any).backgroundColor = slide.background
+  ;(canvas as unknown as { backgroundColor: string }).backgroundColor = slide.background
 
   const W = canvas.getWidth()
   const H = canvas.getHeight()
@@ -94,7 +95,7 @@ export function serializeCanvas(canvas: Canvas, existingSlide: Slide): Slide {
   const objects = canvas.getObjects() as any[]
 
   const elements: SlideElement[] = objects.map((obj: any, i: number) => {
-    const id: string = obj._pid ?? crypto.randomUUID()
+    const id: string = obj._pid ?? randomUUID()
     const zIndex: number = obj._pz ?? i
     const x = toPercent(obj.left ?? 0, W)
     const y = toPercent(obj.top ?? 0, H)
