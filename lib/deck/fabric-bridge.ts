@@ -16,7 +16,7 @@ export async function loadSlide(
   getImageUrl: (storageKey: string) => Promise<string>
 ): Promise<void> {
   canvas.clear()
-  canvas.setBackgroundColor(slide.background, () => canvas.renderAll())
+  ;(canvas as any).backgroundColor = slide.background
 
   const W = canvas.getWidth()
   const H = canvas.getHeight()
@@ -36,6 +36,7 @@ export async function loadSlide(
         width,
         fontSize: el.fontSize ?? 32,
         fontFamily: el.fontFamily ?? 'inter',
+        fontWeight: el.fontWeight,
         fill: el.color ?? '#FFFFFF',
         textAlign: el.textAlign ?? 'left',
         lineHeight: el.lineHeight ?? 1.2,
@@ -68,7 +69,14 @@ export async function loadSlide(
       }
       const url = await getImageUrl(el.storageKey)
       const img = await Image.fromURL(url, { crossOrigin: 'anonymous' } as any)
-      ;(img as any).set({ left, top, width, height })
+      const naturalW = (img as any).width ?? 1
+      const naturalH = (img as any).height ?? 1
+      ;(img as any).set({
+        left,
+        top,
+        scaleX: width / naturalW,
+        scaleY: height / naturalH,
+      })
       ;(img as any)._pid = el.id
       ;(img as any)._pz = el.zIndex
       ;(img as any)._psk = el.storageKey
@@ -99,6 +107,7 @@ export function serializeCanvas(canvas: Canvas, existingSlide: Slide): Slide {
         content: obj.text ?? obj._poriginal ?? '',
         fontSize: obj.fontSize,
         fontFamily: obj.fontFamily,
+        fontWeight: obj.fontWeight,
         color: obj.fill,
         textTransform: obj._ptransform,
         textAlign: obj.textAlign,

@@ -33,7 +33,7 @@ vi.mock('fabric', () => ({
   Image: {
     fromURL: vi.fn(async (_url: string) => ({
       type: 'image',
-      left: 0, top: 0, width: 100, height: 100,
+      left: 0, top: 0, width: 200, height: 150,
       scaleX: 1, scaleY: 1,
       set: vi.fn(function (this: any, props: any) { Object.assign(this, props) }),
     })),
@@ -44,8 +44,8 @@ function makeMockCanvas() {
   const objects: any[] = []
   return {
     objects,
+    backgroundColor: '' as string,
     clear: vi.fn(() => { objects.length = 0 }),
-    setBackgroundColor: vi.fn((_c: string, cb?: () => void) => cb?.()),
     add: vi.fn((obj: any) => objects.push(obj)),
     getObjects: vi.fn(() => [...objects]),
     renderAll: vi.fn(),
@@ -68,7 +68,7 @@ describe('loadSlide', () => {
     const canvas = makeMockCanvas()
     const slide: Slide = { id: 's1', label: 'Test', background: '#FF4D00', elements: [] }
     await loadSlide(canvas as any, slide, vi.fn())
-    expect(canvas.setBackgroundColor).toHaveBeenCalledWith('#FF4D00', expect.any(Function))
+    expect(canvas.backgroundColor).toBe('#FF4D00')
   })
 
   test('adds one IText object for a text element', async () => {
@@ -118,6 +118,31 @@ describe('loadSlide', () => {
     await loadSlide(canvas as any, slide, vi.fn())
     expect(canvas.objects[0].type).toBe('rect')
     expect(canvas.objects[0].fill).toBe('#FF4D00')
+  })
+
+  test('scales image using scaleX/scaleY based on natural dimensions', async () => {
+    const canvas = makeMockCanvas()
+    // element is 50%×50% on a 1920×1080 canvas → pixel 960×540
+    // mock image natural size: 200×150 → scaleX=960/200=4.8, scaleY=540/150=3.6
+    const slide: Slide = {
+      id: 's1', label: 'Test', background: '#000',
+      elements: [{ id: 'e1', type: 'image', x: 0, y: 0, w: 50, h: 50, zIndex: 1, storageKey: 'deck/abc.png' }],
+    }
+    const getImageUrl = vi.fn().mockResolvedValue('https://cdn.example.com/img.png')
+    await loadSlide(canvas as any, slide, getImageUrl)
+    const img = canvas.objects[0]
+    expect(img.scaleX).toBeCloseTo(4.8, 5)
+    expect(img.scaleY).toBeCloseTo(3.6, 5)
+  })
+
+  test('skips image elements with no storageKey', async () => {
+    const canvas = makeMockCanvas()
+    const slide: Slide = {
+      id: 's1', label: 'Test', background: '#000',
+      elements: [{ id: 'e1', type: 'image', x: 0, y: 0, w: 50, h: 50, zIndex: 1 }], // no storageKey
+    }
+    await loadSlide(canvas as any, slide, vi.fn())
+    expect(canvas.add).not.toHaveBeenCalled()
   })
 })
 
@@ -179,6 +204,19 @@ describe('serializeCanvas', () => {
     const existingSlide: Slide = { id: 's1', label: 'Test', background: '#000', elements: [] }
     const result = serializeCanvas(canvas as any, existingSlide)
     expect(result.elements).toHaveLength(0)
+  })
+
+  test('round-trips fontWeight on text elements', () => {
+    const canvas = makeMockCanvas()
+    canvas.objects.push({
+      type: 'i-text', text: 'Bold',
+      left: 96, top: 54, width: 1728, scaleX: 1, scaleY: 1,
+      fill: '#FFFFFF', fontSize: 48, fontFamily: 'inter', fontWeight: 700,
+      _pid: 'e1', _pz: 1, _poriginal: 'Bold',
+    })
+    const existingSlide: Slide = { id: 's1', label: 'Test', background: '#000', elements: [] }
+    const result = serializeCanvas(canvas as any, existingSlide)
+    expect(result.elements[0].fontWeight).toBe(700)
   })
 })
 
