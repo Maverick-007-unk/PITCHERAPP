@@ -1,8 +1,10 @@
 import { inngest } from './client'
 import { db } from '@/lib/db/client'
 import { retrieveSimilarProposals } from '@/lib/rag/retrieve'
+import type { ProposalChunk } from '@/lib/rag/retrieve'
 import { generatePitchSections } from '@/lib/ai/generate-pitch'
 import type { RfpData } from '@/lib/ai/extract-rfp'
+import { initSlideData } from '@/lib/deck/init-slide-data'
 
 export const pitchGenerateFunction = inngest.createFunction(
   { id: 'pitch-generate', name: 'Generate Pitch Sections', triggers: [{ event: 'pitch/generate' }] },
@@ -16,7 +18,7 @@ export const pitchGenerateFunction = inngest.createFunction(
     const pitch = await step.run('load-pitch', async () => {
       return db.pitch.findUniqueOrThrow({
         where: { id: pitchId },
-        include: { rfp: true },
+        include: { rfp: true, theme: true },
       })
     })
 
@@ -29,7 +31,7 @@ export const pitchGenerateFunction = inngest.createFunction(
       )
     })
 
-    const proposalContext = similarProposals
+    const proposalContext = (similarProposals as ProposalChunk[])
       .map((p) => `- ${p.fileName} (similarity: ${p.similarity.toFixed(2)})`)
       .join('\n')
 
@@ -38,11 +40,19 @@ export const pitchGenerateFunction = inngest.createFunction(
     })
 
     await step.run('save-and-create-deck', async () => {
+      const themeConfig = pitch.theme.config as { bg: string }
+      const slideData = initSlideData(sections, themeConfig.bg)
+
       await db.pitch.update({
         where: { id: pitchId },
         data: { status: 'DONE', sections: sections as object },
       })
-      await db.deck.create({ data: { pitchId } })
+      await db.deck.create({
+        data: {
+          pitchId,
+          slideData: slideData as unknown as object,
+        },
+      })
     })
   }
 )
