@@ -1,6 +1,5 @@
 import { IText, Rect, Image } from 'fabric'
 import type { Canvas } from 'fabric'
-import { randomUUID } from 'crypto'
 import type { Slide, SlideElement } from './types'
 
 function toPixels(pct: number, dimension: number): number {
@@ -62,7 +61,11 @@ export async function loadSlide(
       ;(obj as any)._pid = el.id
       ;(obj as any)._pz = el.zIndex
       canvas.add(obj)
-    } else if (el.type === 'image' && el.storageKey) {
+    } else if (el.type === 'image') {
+      if (!el.storageKey) {
+        console.warn(`[fabric-bridge] loadSlide: image element "${el.id}" has no storageKey — skipping`)
+        continue
+      }
       const url = await getImageUrl(el.storageKey)
       const img = await Image.fromURL(url, { crossOrigin: 'anonymous' } as any)
       ;(img as any).set({ left, top, width, height })
@@ -83,7 +86,7 @@ export function serializeCanvas(canvas: Canvas, existingSlide: Slide): Slide {
   const objects = canvas.getObjects() as any[]
 
   const elements: SlideElement[] = objects.map((obj: any, i: number) => {
-    const id: string = obj._pid ?? randomUUID()
+    const id: string = obj._pid ?? crypto.randomUUID()
     const zIndex: number = obj._pz ?? i
     const x = toPercent(obj.left ?? 0, W)
     const y = toPercent(obj.top ?? 0, H)
@@ -93,7 +96,7 @@ export function serializeCanvas(canvas: Canvas, existingSlide: Slide): Slide {
     if (obj.type === 'i-text' || obj.type === 'text') {
       return {
         id, type: 'text', x, y, w, h, zIndex,
-        content: obj._poriginal ?? obj.text ?? '',
+        content: obj.text ?? obj._poriginal ?? '',
         fontSize: obj.fontSize,
         fontFamily: obj.fontFamily,
         color: obj.fill,

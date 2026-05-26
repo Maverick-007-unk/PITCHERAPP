@@ -161,10 +161,42 @@ describe('serializeCanvas', () => {
     expect(result.elements[0].type).toBe('text')
   })
 
+  test('prefers live obj.text over _poriginal so edits are not discarded', () => {
+    const canvas = makeMockCanvas()
+    canvas.objects.push({
+      type: 'i-text', text: 'Edited by user',
+      left: 96, top: 54, width: 1728, scaleX: 1, scaleY: 1,
+      fill: '#FFFFFF', fontSize: 48, fontFamily: 'archivo-black',
+      _pid: 'e1', _pz: 1, _poriginal: 'Original text',
+    })
+    const existingSlide: Slide = { id: 's1', label: 'Test', background: '#000', elements: [] }
+    const result = serializeCanvas(canvas as any, existingSlide)
+    expect(result.elements[0].content).toBe('Edited by user')
+  })
+
   test('returns empty elements for empty canvas', () => {
     const canvas = makeMockCanvas()
     const existingSlide: Slide = { id: 's1', label: 'Test', background: '#000', elements: [] }
     const result = serializeCanvas(canvas as any, existingSlide)
     expect(result.elements).toHaveLength(0)
+  })
+})
+
+describe('loadSlide — zIndex ordering', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  test('adds elements in ascending zIndex order regardless of array order', async () => {
+    const canvas = makeMockCanvas()
+    const slide: Slide = {
+      id: 's1', label: 'Test', background: '#000000',
+      elements: [
+        { id: 'e2', type: 'text', x: 0, y: 0, w: 50, h: 10, zIndex: 2, content: 'Second' },
+        { id: 'e1', type: 'text', x: 0, y: 50, w: 50, h: 10, zIndex: 1, content: 'First' },
+      ],
+    }
+    await loadSlide(canvas as any, slide, vi.fn())
+    // canvas.objects[0] must be zIndex:1 ("First"), objects[1] must be zIndex:2 ("Second")
+    expect(canvas.objects[0].text).toBe('First')
+    expect(canvas.objects[1].text).toBe('Second')
   })
 })
