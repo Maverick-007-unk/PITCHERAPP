@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PITCHER — Dashboard Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF4D00;
+    --black: #000000;
+    --white: #FFFFFF;
+  }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 56px;
+    background: var(--black);
+    border-right: 2px solid #222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 6px;
+    z-index: 50;
+  }
+  .sidebar-logo {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    border: 2px solid var(--orange);
+    padding: 4px 6px;
+    margin-bottom: 12px;
+  }
+  .nav-item {
+    width: 36px; height: 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 7px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    transition: color 0.15s, border-color 0.15s;
+    color: #555;
+  }
+  .nav-item.active { color: var(--orange); border-color: var(--orange); }
+  .nav-item:hover:not(.active) { color: var(--white); border-color: #444; }
+  .nav-icon { font-size: 14px; line-height: 1; }
+  main {
+    margin-left: 56px;
+    flex: 1;
+  }
+  .hero {
+    padding: 24px;
+    border-bottom: 2px solid #222;
+  }
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+  h1 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(60px, 10vw, 96px);
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    line-height: 0.88;
+  }
+  h1 .accent { color: var(--orange); }
+  .stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 2px solid #222;
+  }
+  .stat-num {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 48px;
+    color: var(--orange);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: #555;
+    margin-top: 2px;
+  }
+  .marquee-wrap {
+    border-bottom: 2px solid #222;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+    border-top: 2px solid #222;
+  }
+  .marquee-track {
+    display: inline-block;
+    animation: marquee 12s linear infinite;
+  }
+  .marquee-item {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: #333;
+    padding: 0 32px;
+  }
+  .marquee-item::before {
+    content: '// ';
+    color: var(--orange);
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .workflow {
+    padding: 24px;
+  }
+  .workflow-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: #555;
+    margin-bottom: 16px;
+  }
+  .workflow-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    transition: padding-left 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .workflow-item:hover { padding-left: 16px; }
+  .workflow-item:hover .workflow-title { transform: translateX(16px); }
+  .workflow-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--orange);
+    min-width: 20px;
+  }
+  .workflow-title {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 30px;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    transition: transform 0.2s;
+  }
+  .workflow-tag {
+    margin-left: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    border: 1px solid #333;
+    color: #555;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .cta-wrap {
+    margin-top: 48px;
+    text-align: center;
+  }
+  .pill-btn {
+    display: inline-block;
+    border-radius: 999px;
+    border: 2px solid var(--orange);
+    background: var(--orange);
+    color: var(--black);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: transform 0.15s;
+    text-decoration: none;
+  }
+  .pill-btn:hover { transform: scale(1.05); }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">P</div>
+  <a class="nav-item active" href="#" title="Home">
+    <span class="nav-icon">⊞</span>Home
+  </a>
+  <a class="nav-item" href="#" title="RFPs">
+    <span class="nav-icon">☰</span>RFPs
+  </a>
+  <a class="nav-item" href="#" title="Pitch">
+    <span class="nav-icon">★</span>Pitch
+  </a>
+  <a class="nav-item" href="#" title="Decks">
+    <span class="nav-icon">▣</span>Decks
+  </a>
+  <a class="nav-item" href="#" title="Team">
+    <span class="nav-icon">◎</span>Team
+  </a>
+</aside>
+
+<!-- Main -->
+<main>
+  <!-- Hero -->
+  <div class="hero">
+    <p class="eyebrow">// Pitcher — Esports Sponsorship OS</p>
+    <h1>Win<br/>Every<br/><span class="accent">Deal.</span></h1>
+    <div class="stats">
+      <div>
+        <p class="stat-num">00</p>
+        <p class="stat-label">RFPs Analyzed</p>
+      </div>
+      <div>
+        <p class="stat-num">00</p>
+        <p class="stat-label">Pitches Generated</p>
+      </div>
+      <div>
+        <p class="stat-num">00</p>
+        <p class="stat-label">Decks Shared</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Marquee -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span class="marquee-item">RFP Analyzer</span>
+      <span class="marquee-item">Pitch Generator</span>
+      <span class="marquee-item">Deck Maker</span>
+      <span class="marquee-item">Export &amp; Share</span>
+      <span class="marquee-item">RFP Analyzer</span>
+      <span class="marquee-item">Pitch Generator</span>
+      <span class="marquee-item">Deck Maker</span>
+      <span class="marquee-item">Export &amp; Share</span>
+    </div>
+  </div>
+
+  <!-- Workflow -->
+  <div class="workflow">
+    <p class="workflow-label">// Workflow</p>
+    <a class="workflow-item" href="#">
+      <span class="workflow-num">01</span>
+      <span class="workflow-title">Upload RFP</span>
+      <span class="workflow-tag">Start Here</span>
+    </a>
+    <a class="workflow-item" href="#">
+      <span class="workflow-num">02</span>
+      <span class="workflow-title">Select Theme</span>
+      <span class="workflow-tag">Then</span>
+    </a>
+    <a class="workflow-item" href="#">
+      <span class="workflow-num">03</span>
+      <span class="workflow-title">Generate Pitch</span>
+      <span class="workflow-tag">Then</span>
+    </a>
+    <a class="workflow-item" href="#">
+      <span class="workflow-num">04</span>
+      <span class="workflow-title">Share Deck</span>
+      <span class="workflow-tag">Done</span>
+    </a>
+
+    <div class="cta-wrap">
+      <a class="pill-btn" href="#">Upload First RFP →</a>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
