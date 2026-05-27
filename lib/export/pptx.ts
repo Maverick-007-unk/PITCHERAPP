@@ -19,7 +19,8 @@ export async function generatePptx(
     const s = pptx.addSlide()
     s.background = { color: slide.background.replace('#', '') }
 
-    for (const el of slide.elements) {
+    const sorted = [...slide.elements].sort((a, b) => a.zIndex - b.zIndex)
+    for (const el of sorted) {
       const x = pctToInches(el.x, SLIDE_W)
       const y = pctToInches(el.y, SLIDE_H)
       const w = pctToInches(el.w, SLIDE_W)
@@ -41,12 +42,14 @@ export async function generatePptx(
             ? { color: el.borderColor.replace('#', ''), width: el.borderWidth ?? 1 }
             : { color: 'transparent', width: 0 },
         })
+        // borderRadius not supported by pptxgenjs v4
       } else if (el.type === 'image' && el.storageKey) {
         try {
           const buf = await getImageBuffer(el.storageKey)
           s.addImage({
             data: `image/jpeg;base64,${buf.toString('base64')}`,
             x, y, w, h,
+            ...(el.objectFit ? { sizing: { type: el.objectFit as 'cover' | 'contain', w, h } } : {}),
           })
         } catch {
           // Skip images that fail to fetch
