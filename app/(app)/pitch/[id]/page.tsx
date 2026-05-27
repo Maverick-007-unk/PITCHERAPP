@@ -1,10 +1,11 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
 import { db } from '@/lib/db/client'
 import { GenerationProgress } from '@/components/pitch/generation-progress'
 import { PublishButton } from './publish-button'
 import { SlideView } from '@/components/deck/slide-view'
-import type { PitchSections } from '@/lib/ai/generate-pitch'
+import type { SlideData } from '@/lib/deck/types'
 
 export default async function PitchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { orgId } = await auth()
@@ -20,7 +21,9 @@ export default async function PitchDetailPage({ params }: { params: Promise<{ id
   })
   if (!pitch) notFound()
 
-  const sections = pitch.sections as PitchSections | null
+  const slides = pitch.deck?.slideData
+    ? (pitch.deck.slideData as unknown as SlideData)
+    : null
 
   return (
     <div className="p-6">
@@ -29,19 +32,30 @@ export default async function PitchDetailPage({ params }: { params: Promise<{ id
         <h1 className="font-archivo text-5xl uppercase tracking-tight4 leading-brutalist">
           {pitch.theme.name}
         </h1>
-        {pitch.deck && (
-          <PublishButton
-            shareToken={pitch.deck.shareToken}
-            isPublished={!!pitch.deck.publishedAt}
-          />
-        )}
+        <div className="flex items-center gap-3">
+          {pitch.deck && pitch.status === 'DONE' && (
+            <Link
+              href={`/pitch/${pitch.id}/editor`}
+              className="font-mono text-[10px] uppercase bg-ko-orange text-black px-4 py-2"
+            >
+              Open Editor →
+            </Link>
+          )}
+          {pitch.deck && (
+            <PublishButton
+              shareToken={pitch.deck.shareToken}
+              isPublished={!!pitch.deck.publishedAt}
+            />
+          )}
+        </div>
       </div>
 
-      <GenerationProgress pitchId={pitch.id} initialStatus={pitch.status as 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED'} />
+      <GenerationProgress
+        pitchId={pitch.id}
+        initialStatus={pitch.status as 'PENDING' | 'RUNNING' | 'DONE' | 'FAILED'}
+      />
 
-      {sections && (
-        <SlideView sections={sections as PitchSections} themeName={pitch.theme.name} />
-      )}
+      {slides && <SlideView slides={slides} />}
     </div>
   )
 }
