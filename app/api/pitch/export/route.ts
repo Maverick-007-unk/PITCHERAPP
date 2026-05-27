@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       return Buffer.from(await res.arrayBuffer())
     }
     const buffer = await generatePptx(slideData, getImageBuffer)
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         'Content-Disposition': 'attachment; filename="pitch.pptx"',
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
 
   const deckUrl = `${appUrl}/deck/${pitch.deck.shareToken}?print=1`
   const buffer = await generatePdf(deckUrl)
-  return new NextResponse(buffer, {
+  return new NextResponse(new Uint8Array(buffer), {
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename="pitch.pdf"',
