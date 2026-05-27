@@ -12,7 +12,7 @@ export default async function PublicDeckPage({ params }: { params: Promise<{ tok
 
   if (!deck || !deck.publishedAt) notFound()
 
-  const sections = deck.pitch.sections as PitchSections
+  const sections = deck.pitch.sections as unknown as PitchSections
 
   return (
     <div className="min-h-screen bg-ko-black">

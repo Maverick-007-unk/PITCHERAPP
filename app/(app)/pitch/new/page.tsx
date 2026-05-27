@@ -11,7 +11,7 @@ export default async function NewPitchPage({ searchParams }: { searchParams: Pro
       <h1 className="font-archivo text-6xl uppercase tracking-tight4 leading-brutalist mb-8">
         Pick Your<br/>Theme
       </h1>
-      <ThemeSelectorClient themes={themes} rfpId={rfpId ?? ''} />
+      <ThemeSelectorClient themes={themes as { id: string; name: string; thumbnailUrl: string; config: object }[]} rfpId={rfpId ?? ''} />
     </div>
   )
 }

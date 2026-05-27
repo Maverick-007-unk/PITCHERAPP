@@ -2,7 +2,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Archivo_Black, Space_Mono, Inter } from 'next/font/google'
 import './globals.css'
 
-const archivo = Archivo_Black({ subsets: ['latin'], variable: '--font-archivo' })
+const archivo = Archivo_Black({ weight: '400', subsets: ['latin'], variable: '--font-archivo' })
 const spaceMono = Space_Mono({ weight: ['400', '700'], subsets: ['latin'], variable: '--font-space-mono' })
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 

@@ -1,6 +1,7 @@
 import { inngest } from './client'
 import { db } from '@/lib/db/client'
 import { retrieveSimilarProposals } from '@/lib/rag/retrieve'
+import type { ProposalChunk } from '@/lib/rag/retrieve'
 import { generatePitchSections } from '@/lib/ai/generate-pitch'
 import type { RfpData } from '@/lib/ai/extract-rfp'
 
@@ -29,7 +30,7 @@ export const pitchGenerateFunction = inngest.createFunction(
       )
     })
 
-    const proposalContext = similarProposals
+    const proposalContext = (similarProposals as ProposalChunk[])
       .map((p) => `- ${p.fileName} (similarity: ${p.similarity.toFixed(2)})`)
       .join('\n')
 
