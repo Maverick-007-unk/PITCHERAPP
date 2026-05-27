@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import type { SlideData, Slide, SlideElement } from '@/lib/deck/types'
 import { EditorToolbar } from './editor-toolbar'
@@ -38,6 +38,10 @@ export function DeckEditor({
   const canvasRef = useRef<CanvasAreaRef>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const historyRef = useRef<SlideData[]>([JSON.parse(JSON.stringify(initialSlides))])
+
+  useEffect(() => () => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+  }, [])
   const historyIndexRef = useRef(0)
   const [canUndo, setCanUndo] = useState(false)
   const [canRedo, setCanRedo] = useState(false)
@@ -76,46 +80,34 @@ export function DeckEditor({
   }, [pushHistory, scheduleSave])
 
   const handleSlideChange = useCallback((updatedSlide: Slide) => {
-    setSlides((prev) => {
-      const next = prev.map((s) => (s.id === updatedSlide.id ? updatedSlide : s))
-      pushHistory(next)
-      scheduleSave(next)
-      return next
-    })
-  }, [pushHistory, scheduleSave])
+    const next = slides.map((s) => (s.id === updatedSlide.id ? updatedSlide : s))
+    updateSlides(next)
+  }, [slides, updateSlides])
 
   const handleElementUpdate = useCallback((changes: Partial<SlideElement>) => {
     if (!selectedElementId) return
     canvasRef.current?.updateElement(selectedElementId, changes)
-    setSlides((prev) => {
-      const next = prev.map((slide, i) => {
-        if (i !== currentIndex) return slide
-        return {
-          ...slide,
-          elements: slide.elements.map((el) =>
-            el.id === selectedElementId ? { ...el, ...changes } : el
-          ),
-        }
-      })
-      pushHistory(next)
-      scheduleSave(next)
-      return next
+    const next = slides.map((slide, i) => {
+      if (i !== currentIndex) return slide
+      return {
+        ...slide,
+        elements: slide.elements.map((el) =>
+          el.id === selectedElementId ? { ...el, ...changes } : el
+        ),
+      }
     })
-  }, [selectedElementId, currentIndex, pushHistory, scheduleSave])
+    updateSlides(next)
+  }, [selectedElementId, currentIndex, slides, updateSlides])
 
   const handleElementDelete = useCallback(() => {
     if (!selectedElementId) return
-    setSlides((prev) => {
-      const next = prev.map((slide, i) => {
-        if (i !== currentIndex) return slide
-        return { ...slide, elements: slide.elements.filter((el) => el.id !== selectedElementId) }
-      })
-      pushHistory(next)
-      scheduleSave(next)
-      return next
+    const next = slides.map((slide, i) => {
+      if (i !== currentIndex) return slide
+      return { ...slide, elements: slide.elements.filter((el) => el.id !== selectedElementId) }
     })
+    updateSlides(next)
     setSelectedElementId(null)
-  }, [selectedElementId, currentIndex, pushHistory, scheduleSave])
+  }, [selectedElementId, currentIndex, slides, updateSlides])
 
   const handleAddSlide = useCallback(() => {
     const newSlide: Slide = {
@@ -163,8 +155,10 @@ export function DeckEditor({
   }, [scheduleSave])
 
   const handlePublish = useCallback(async () => {
-    const res = await fetch(`/api/pitch/${pitchId}/publish`, { method: 'POST' })
-    if (res.ok) setIsPublished(true)
+    try {
+      const res = await fetch(`/api/pitch/${pitchId}/publish`, { method: 'POST' })
+      if (res.ok) setIsPublished(true)
+    } catch { /* silent */ }
   }, [pitchId])
 
   const selectedElement =
