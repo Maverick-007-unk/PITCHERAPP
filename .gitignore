@@ -42,3 +42,8 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# Local AI reference data (large binary files — kept local, not in git)
+/OLD PROPOSALS/
+/Old Proposals/
+/RFP/
