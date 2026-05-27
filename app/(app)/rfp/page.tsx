@@ -20,7 +20,7 @@ export default async function RfpPage() {
       <RfpUploadClient />
       <div className="mt-12">
         <p className="font-mono text-[10px] uppercase tracking-tight2 text-[#555] mb-4">// {rfps.length} documents</p>
-        {rfps.map((rfp) => (
+        {rfps.map((rfp: { id: string; status: string; fileName: string }) => (
           <Link key={rfp.id} href={`/rfp/${rfp.id}`} className="flex items-center gap-4 py-4 border-b border-[#222] hover:pl-4 transition-all group">
             <span className="font-mono text-[10px] text-ko-orange uppercase">{rfp.status}</span>
             <span className="font-archivo text-2xl uppercase tracking-tight4 group-hover:text-ko-orange transition-colors">{rfp.fileName}</span>
