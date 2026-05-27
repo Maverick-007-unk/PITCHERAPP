@@ -99,7 +99,10 @@ model Pitch {
 model Deck {
   id          String    @id @default(cuid())
   pitchId     String    @unique
+  slideData   Json?
   shareToken  String    @unique @default(cuid())
   publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   pitch       Pitch     @relation(fields: [pitchId], references: [id])
 }
