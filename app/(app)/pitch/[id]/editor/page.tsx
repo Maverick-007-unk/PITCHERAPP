@@ -15,7 +15,7 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
   const { id } = await params
   const pitch = await db.pitch.findUnique({
     where: { id, orgId: org.id },
-    include: { theme: true, deck: true },
+    include: { deck: true },
   })
   if (!pitch || !pitch.deck) notFound()
   if (!pitch.deck.slideData) redirect(`/pitch/${id}`)
